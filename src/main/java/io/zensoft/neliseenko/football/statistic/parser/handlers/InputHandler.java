@@ -37,11 +37,11 @@ public class InputHandler {
             } else if (EXIT.equalsIgnoreCase(word.trim())) {
                 System.err.println("Thank you for attention\nBy Nikita Eliseenko");
                 //System.exit(0);
-                // Без exit(0) main просто завершится, само собо
+                // Без exit(0) main просто завершится, само собой
                 // но оставлять просто пустым блок else мне показалось как-то bad practice,
-                // на маленьком проекте как этот еще куда не шло,
+                // на маленьком проекте, как этот, еще куда не шло,
                 // но на больших я думаю не лучшая идея оставлять блок пустым.
-                // Может и ошибаюсь , хотелось бы узнать подробнее почему его не стоит тут использовать.
+                // Может и ошибаюсь, хотелось бы узнать подробнее почему не стоит использовать.
             } else if (!HELP.equalsIgnoreCase(word.trim())) {
                 handleInputTeam(word);
             } else {
