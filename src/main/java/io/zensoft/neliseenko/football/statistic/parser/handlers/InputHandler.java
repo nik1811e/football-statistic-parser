@@ -1,9 +1,9 @@
 package io.zensoft.neliseenko.football.statistic.parser.handlers;
 
-import io.zensoft.neliseenko.football.statistic.parser.api.CallToApi;
 import io.zensoft.neliseenko.football.statistic.parser.to.StatisticTO;
 import io.zensoft.neliseenko.football.statistic.parser.to.TableTO;
-import io.zensoft.neliseenko.football.statistic.parser.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,16 +11,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static io.zensoft.neliseenko.football.statistic.parser.api.CallToApi.call;
+import static io.zensoft.neliseenko.football.statistic.parser.utils.Utils.readPropertiesValue;
+
 public class InputHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(InputHandler.class);
+
     private static final String HELP = "help";
     private static final String EXIT = "exit";
+
     private static StatisticTO to;
     private static Map<Integer, String> map;
 
     static {
-        to = new CallToApi().call("http://api.football-data.org/v2/competitions/"
-                + new Utils().readPropertiesValue("id") + "/standings");
-
+        to = call("http://api.football-data.org/v2/competitions/"
+                + readPropertiesValue("id") + "/standings");
         int index = 1;
         map = new HashMap<>();
         for (TableTO table : to.getStandings().get(0).getTable()) {
@@ -28,47 +33,48 @@ public class InputHandler {
         }
     }
 
-    private static void handler(String word) {
+    private void handler(String word) {
         if (!word.isEmpty()) {
             if (HELP.equalsIgnoreCase(word.trim())) {
                 outputHelp();
             } else if (EXIT.equalsIgnoreCase(word.trim())) {
-                System.exit(0);
+                System.err.println("Thank you for attention\nBy Nikita Eliseenko");
+                //System.exit(0);
             } else if (!HELP.equalsIgnoreCase(word.trim())) {
                 handleInputTeam(word);
             } else {
-                System.out.println("Please, enter the correct data.");
+                LOGGER.info("Please, enter the correct data.");
                 input();
             }
         } else {
-            System.out.println("You didn't enter anything.");
+            LOGGER.error("You didn't enter anything.");
             input();
         }
     }
 
-    private static void handleInputTeam(String word) {
+    private void handleInputTeam(String word) {
         if (Pattern.compile("\\d+").matcher(word).matches()) {
             if (Integer.parseInt(word) <= map.size()) {
-                System.out.println(searchResultByName(map.get(Integer.parseInt(word))));
+                System.err.println(searchResultByName(map.get(Integer.parseInt(word))));
             } else {
-                System.err.println("Invalid number entered.");
+                LOGGER.error("Invalid number (" + word + ") entered.");
             }
             input();
         } else {
-            System.out.println(searchResultByName(word));
+            System.err.println(searchResultByName(word));
             input();
         }
     }
 
-    private static void outputHelp() {
+    private void outputHelp() {
         int index = 1;
         for (TableTO table : to.getStandings().get(0).getTable()) {
-            System.err.println(index++ + " " + table.getTeam().getName());
+            System.out.println(index++ + " " + table.getTeam().getName());
         }
         input();
     }
 
-    private static String searchResultByName(String name) {
+    private String searchResultByName(String name) {
         String r = "";
         for (TableTO table : to.getStandings().get(0).getTable()) {
             if (table.getTeam().getName().equalsIgnoreCase(name)) {
@@ -81,14 +87,19 @@ public class InputHandler {
         return r;
     }
 
-    public static void input() {
+    private void input() {
         try {
-            System.out.println("Enter the command name or " + HELP);
-            System.out.println("For exit: " + EXIT);
+            System.out.println("_____________________________________________________\n" +
+                    "Enter the team name (number) or " + HELP +
+                    "\nFor exit: " + EXIT);
             BufferedReader standardInput = new BufferedReader(new InputStreamReader(System.in));
             handler(standardInput.readLine());
         } catch (Exception e) {
-            System.err.println("ERROR: " + e.getMessage());
+            LOGGER.error("ERROR: " + e.getMessage());
         }
+    }
+
+    public void perform() {
+        input();
     }
 }
