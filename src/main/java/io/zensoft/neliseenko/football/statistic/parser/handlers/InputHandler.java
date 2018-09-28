@@ -2,8 +2,6 @@ package io.zensoft.neliseenko.football.statistic.parser.handlers;
 
 import io.zensoft.neliseenko.football.statistic.parser.to.StatisticTO;
 import io.zensoft.neliseenko.football.statistic.parser.to.TableTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,7 +13,6 @@ import static io.zensoft.neliseenko.football.statistic.parser.api.CallToApi.call
 import static io.zensoft.neliseenko.football.statistic.parser.utils.Utils.readPropertiesValue;
 
 public class InputHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InputHandler.class);
 
     private static final String HELP = "help";
     private static final String EXIT = "exit";
@@ -40,14 +37,19 @@ public class InputHandler {
             } else if (EXIT.equalsIgnoreCase(word.trim())) {
                 System.err.println("Thank you for attention\nBy Nikita Eliseenko");
                 //System.exit(0);
+                // Без exit(0) main просто завершится, само собо
+                // но оставлять просто пустым блок else мне показалось как-то bad practice,
+                // на маленьком проекте как этот еще куда не шло,
+                // но на больших я думаю не лучшая идея оставлять блок пустым.
+                // Может и ошибаюсь , хотелось бы узнать подробнее почему его не стоит тут использовать.
             } else if (!HELP.equalsIgnoreCase(word.trim())) {
                 handleInputTeam(word);
             } else {
-                LOGGER.info("Please, enter the correct data.");
+                System.err.println("Please, enter the correct data.");
                 input();
             }
         } else {
-            LOGGER.error("You didn't enter anything.");
+            System.err.println("You didn't enter anything.");
             input();
         }
     }
@@ -55,13 +57,13 @@ public class InputHandler {
     private void handleInputTeam(String word) {
         if (Pattern.compile("\\d+").matcher(word).matches()) {
             if (Integer.parseInt(word) <= map.size()) {
-                System.err.println(searchResultByName(map.get(Integer.parseInt(word))));
+                System.out.println(searchResultByName(map.get(Integer.parseInt(word))));
             } else {
-                LOGGER.error("Invalid number (" + word + ") entered.");
+                System.err.println("Invalid number (" + word + ") entered.");
             }
             input();
         } else {
-            System.err.println(searchResultByName(word));
+            System.out.println(searchResultByName(word));
             input();
         }
     }
@@ -95,7 +97,7 @@ public class InputHandler {
             BufferedReader standardInput = new BufferedReader(new InputStreamReader(System.in));
             handler(standardInput.readLine());
         } catch (Exception e) {
-            LOGGER.error("ERROR: " + e.getMessage());
+            System.err.println("ERROR: " + e.getMessage());
         }
     }
 
